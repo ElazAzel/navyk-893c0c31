@@ -414,10 +414,15 @@ export type Database = {
           bio: string | null
           created_at: string
           email: string
+          email_verified: boolean | null
           full_name: string
+          google_connected: boolean | null
           id: string
           location: string | null
           phone: string | null
+          phone_verified: boolean | null
+          telegram_id: number | null
+          telegram_username: string | null
           updated_at: string
         }
         Insert: {
@@ -425,10 +430,15 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email: string
+          email_verified?: boolean | null
           full_name: string
+          google_connected?: boolean | null
           id: string
           location?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
+          telegram_id?: number | null
+          telegram_username?: string | null
           updated_at?: string
         }
         Update: {
@@ -436,10 +446,15 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string
+          email_verified?: boolean | null
           full_name?: string
+          google_connected?: boolean | null
           id?: string
           location?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
+          telegram_id?: number | null
+          telegram_username?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -531,6 +546,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      telegram_verification_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          telegram_id: number
+          used: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          telegram_id: number
+          used?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          telegram_id?: number
+          used?: boolean | null
+        }
+        Relationships: []
       }
       user_achievements: {
         Row: {
@@ -792,6 +834,7 @@ export type Database = {
         Args: { _user_id: string; _xp_amount: number }
         Returns: undefined
       }
+      cleanup_expired_verification_codes: { Args: never; Returns: undefined }
       deduct_credits: {
         Args: { _amount: number; _user_id: string }
         Returns: boolean
