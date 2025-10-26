@@ -1,4 +1,4 @@
-import { User, CreditCard, Crown, Settings, LogOut, Zap, TrendingUp, Award } from "lucide-react";
+import { User, CreditCard, Crown, Settings, Zap, TrendingUp, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +10,10 @@ interface ProfilePageProps {
   credits: number;
   isPro: boolean;
   onUpgrade: () => void;
+  profile: any;
 }
 
-const ProfilePage = ({ userName, credits, isPro, onUpgrade }: ProfilePageProps) => {
+const ProfilePage = ({ userName, credits, isPro, onUpgrade, profile }: ProfilePageProps) => {
   return (
     <div className="space-y-4 pb-20">
       {/* Profile Header */}
@@ -36,7 +37,8 @@ const ProfilePage = ({ userName, credits, isPro, onUpgrade }: ProfilePageProps) 
                 )}
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                Студент • Алматы, Казахстан
+                {profile?.email || 'email@example.com'}
+                {profile?.location && ` • ${profile.location}`}
               </p>
               
               {!isPro && (
@@ -187,10 +189,6 @@ const ProfilePage = ({ userName, credits, isPro, onUpgrade }: ProfilePageProps) 
           <Button variant="ghost" className="w-full justify-start">
             <Settings className="h-4 w-4 mr-3" />
             Настройки
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive">
-            <LogOut className="h-4 w-4 mr-3" />
-            Выйти
           </Button>
         </CardContent>
       </Card>
