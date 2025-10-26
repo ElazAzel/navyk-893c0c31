@@ -6,6 +6,7 @@ import CourseManagement from "./CourseManagement";
 import EventManagement from "./EventManagement";
 import JobManagement from "./JobManagement";
 import UserAnalytics from "./UserAnalytics";
+import AdminWelcome from "./AdminWelcome";
 
 const AdminDashboard = () => {
   return (
@@ -18,8 +19,12 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto">
+      <Tabs defaultValue="welcome" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto">
+          <TabsTrigger value="welcome" className="gap-2">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Главная</span>
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Аналитика</span>
@@ -37,6 +42,10 @@ const AdminDashboard = () => {
             <span className="hidden sm:inline">Вакансии</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="welcome">
+          <AdminWelcome />
+        </TabsContent>
 
         <TabsContent value="analytics">
           <UserAnalytics />

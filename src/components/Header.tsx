@@ -1,5 +1,7 @@
-import { Sparkles, CreditCard } from "lucide-react";
+import { Sparkles, CreditCard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import logo from "@/assets/logo.svg";
 
 interface HeaderProps {
@@ -9,12 +11,20 @@ interface HeaderProps {
 }
 
 const Header = ({ credits, isPro, onUpgrade }: HeaderProps) => {
+  const { isAdmin } = useAdminRole();
+  
   return (
     <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border">
       <div className="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
         <div className="flex items-center gap-2">
           <img src={logo} alt="NAVYK" className="h-8 w-8" />
           <span className="text-xl font-bold gradient-text">NAVYK</span>
+          {isAdmin && (
+            <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary border-primary/20">
+              <Shield className="h-3 w-3 mr-1" />
+              Админ
+            </Badge>
+          )}
         </div>
         
         <div className="flex items-center gap-3">
