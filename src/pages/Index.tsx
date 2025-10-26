@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useGamification } from "@/hooks/useGamification";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 import HomePage from "@/components/HomePage";
@@ -9,6 +10,7 @@ import ResumePage from "@/components/ResumePage";
 import JobsPage from "@/components/JobsPage";
 import MentorsPage from "@/components/MentorsPage";
 import ProfilePage from "@/components/ProfilePage";
+import GamificationPage from "@/components/GamificationPage";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -21,6 +23,7 @@ declare global {
 const Index = () => {
   const { user } = useAuth();
   const { profile, credits, subscription, loading, isPro } = useUserProfile();
+  const { updateQuestProgress } = useGamification();
   const [activeTab, setActiveTab] = useState("home");
 
   const userName = profile?.full_name || "Пользователь";
@@ -45,14 +48,17 @@ const Index = () => {
     }
   }, []);
 
-  // Welcome message
+  // Welcome message and daily login quest
   useEffect(() => {
-    if (profile) {
-      toast.success(`Добро пожаловать, ${userName}!`, {
+    if (profile && updateQuestProgress) {
+      toast.success(`Добро пожаловать, ${profile.full_name}!`, {
         description: "Начните свой путь к карьерному успеху",
       });
+      
+      // Update daily login quest
+      updateQuestProgress('daily_login', 1);
     }
-  }, [profile]);
+  }, [profile?.id]); // Only trigger on profile ID change
 
   const handleUpgrade = () => {
     toast.info("Функция оплаты в разработке", {
@@ -83,6 +89,8 @@ const Index = () => {
         return <JobsPage />;
       case "mentors":
         return <MentorsPage />;
+      case "gamification":
+        return <GamificationPage />;
       case "profile":
         return (
           <ProfilePage

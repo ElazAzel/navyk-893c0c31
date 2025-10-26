@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Rocket, Sparkles } from 'lucide-react';
+import logo from "@/assets/logo.svg";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const Auth = () => {
           <div className="flex justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 animate-pulse" />
-              <Rocket className="relative h-16 w-16 text-primary" />
+              <img src={logo} alt="NAVYK" className="relative h-20 w-20" />
             </div>
           </div>
           <div>

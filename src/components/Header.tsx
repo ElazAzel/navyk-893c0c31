@@ -1,5 +1,6 @@
 import { Sparkles, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.svg";
 
 interface HeaderProps {
   credits: number;
@@ -12,9 +13,7 @@ const Header = ({ credits, isPro, onUpgrade }: HeaderProps) => {
     <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border">
       <div className="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="bg-gradient-primary rounded-lg p-2">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
+          <img src={logo} alt="NAVYK" className="h-8 w-8" />
           <span className="text-xl font-bold gradient-text">NAVYK</span>
         </div>
         

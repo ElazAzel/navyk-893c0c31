@@ -1,4 +1,4 @@
-import { Brain, FileText, Briefcase, Users, Sparkles, TrendingUp } from "lucide-react";
+import { Brain, FileText, Briefcase, Users, Sparkles, TrendingUp, Trophy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +40,14 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
       description: "Забронируйте встречу с опытными экспертами",
       gradient: "from-purple-500 to-pink-500",
       action: "Найти ментора"
+    },
+    {
+      id: "gamification",
+      icon: Trophy,
+      title: "Геймификация",
+      description: "Получайте награды и достигайте новых уровней",
+      gradient: "from-yellow-500 to-orange-500",
+      action: "Смотреть награды"
     }
   ];
 
