@@ -56,30 +56,51 @@ export const PersonalizedRecommendations = ({
         .select("*")
         .eq("is_published", true)
         .order("rating", { ascending: false })
-        .limit(10);
+        .limit(15); // Загружаем больше для лучшего подбора
 
-      // Простой алгоритм рекомендаций на основе навыков
+      // Улучшенный алгоритм рекомендаций
       const recs: Recommendation[] = [];
+      const skillNames = skills?.map((s) => s.skill_name.toLowerCase()) || [];
+      const recentCategories = new Set(
+        activity
+          ?.map((a: any) => a.metadata?.category)
+          .filter(Boolean)
+          .map((c: string) => c.toLowerCase())
+      );
 
       if (courses) {
         courses.forEach((course) => {
           let matchScore = 50; // базовый скор
+          const courseCategoryLower = course.category.toLowerCase();
+          const courseTagsLower = (course.tags as string[])?.map((t) =>
+            t.toLowerCase()
+          );
 
-          // Увеличиваем скор если категория совпадает с навыками
-          if (skills?.some((s) => course.category.includes(s.skill_name))) {
+          // Проверка совпадения с навыками
+          const hasSkillMatch = skillNames.some(
+            (skill) =>
+              courseCategoryLower.includes(skill) ||
+              courseTagsLower?.some((tag) => tag.includes(skill))
+          );
+          if (hasSkillMatch) {
             matchScore += 30;
           }
 
-          // Увеличиваем скор для высоко оцененных курсов
-          if (course.rating > 4.5) {
+          // Высокий рейтинг курса
+          if (course.rating && course.rating > 4.5) {
             matchScore += 10;
           }
 
-          // Увеличиваем скор для недавно просмотренных категорий
-          const recentCategories = activity
-            ?.map((a: any) => a.metadata?.category)
-            .filter(Boolean);
-          if (recentCategories?.includes(course.category)) {
+          // Недавно просмотренные категории
+          if (recentCategories.has(courseCategoryLower)) {
+            matchScore += 20;
+          }
+
+          // Соответствие уровня пользователя
+          const userLevels = new Set(
+            skills?.map((s) => s.skill_level.toLowerCase())
+          );
+          if (userLevels.has(course.level.toLowerCase())) {
             matchScore += 15;
           }
 
@@ -87,9 +108,12 @@ export const PersonalizedRecommendations = ({
             id: course.id,
             title: course.title,
             type: "course",
-            reason: matchScore > 70
-              ? "Соответствует вашим навыкам"
-              : "Популярный курс",
+            reason:
+              matchScore > 70
+                ? "Соответствует вашим навыкам"
+                : matchScore > 60
+                ? "Рекомендуем изучить"
+                : "Популярный курс",
             category: course.category,
             level: course.level,
             duration_hours: course.duration_hours,

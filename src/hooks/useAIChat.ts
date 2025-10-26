@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useRateLimiting } from './useRateLimiting';
 
 interface Message {
   role: "user" | "assistant";
@@ -16,6 +17,12 @@ export const useAIChat = (coachId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  
+  // Rate limiting: 10 requests per minute
+  const { checkRateLimit } = useRateLimiting({
+    maxRequests: 10,
+    windowMs: 60000, // 1 minute
+  });
 
   // Load chat history when component mounts
   useEffect(() => {
@@ -79,6 +86,11 @@ export const useAIChat = (coachId: string) => {
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return;
+    
+    // Check rate limit before sending
+    if (!checkRateLimit()) {
+      return;
+    }
 
     const userMessage: Message = {
       role: "user",

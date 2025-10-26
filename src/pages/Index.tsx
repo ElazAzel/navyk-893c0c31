@@ -57,9 +57,13 @@ const Index = () => {
     }
   }, []);
 
-  // Welcome message and daily login quest
+  // Welcome message and daily login quest - only once on mount
   useEffect(() => {
-    if (profile && updateQuestProgress) {
+    let hasShownWelcome = false;
+    
+    if (profile && updateQuestProgress && !hasShownWelcome) {
+      hasShownWelcome = true;
+      
       toast.success(`Добро пожаловать, ${profile.full_name}!`, {
         description: "Начните свой путь к карьерному успеху",
       });
@@ -67,7 +71,7 @@ const Index = () => {
       // Update daily login quest
       updateQuestProgress('daily_login', 1);
     }
-  }, [profile?.id]); // Only trigger on profile ID change
+  }, []); // Only on mount, not on profile change
 
   const handleUpgrade = () => {
     toast.info("Функция оплаты в разработке", {
