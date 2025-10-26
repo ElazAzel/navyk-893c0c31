@@ -11,9 +11,10 @@ interface ProfilePageProps {
   isPro: boolean;
   onUpgrade: () => void;
   profile: any;
+  onNavigate: (tab: string) => void;
 }
 
-const ProfilePage = ({ userName, credits, isPro, onUpgrade, profile }: ProfilePageProps) => {
+const ProfilePage = ({ userName, credits, isPro, onUpgrade, profile, onNavigate }: ProfilePageProps) => {
   return (
     <div className="space-y-4 pb-20">
       {/* Profile Header */}
@@ -177,18 +178,22 @@ const ProfilePage = ({ userName, credits, isPro, onUpgrade, profile }: ProfilePa
 
       {/* Settings */}
       <Card className="border-border/50">
-        <CardContent className="pt-6 space-y-1">
-          <Button variant="ghost" className="w-full justify-start">
+        <CardContent className="pt-4 sm:pt-6 space-y-1">
+          <Button variant="ghost" className="w-full justify-start text-sm sm:text-base h-9 sm:h-10">
             <User className="h-4 w-4 mr-3" />
             Редактировать профиль
           </Button>
-          <Button variant="ghost" className="w-full justify-start">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-sm sm:text-base h-9 sm:h-10"
+            onClick={() => onNavigate('settings')}
+          >
+            <Settings className="h-4 w-4 mr-3" />
+            Настройки аккаунта
+          </Button>
+          <Button variant="ghost" className="w-full justify-start text-sm sm:text-base h-9 sm:h-10">
             <CreditCard className="h-4 w-4 mr-3" />
             История транзакций
-          </Button>
-          <Button variant="ghost" className="w-full justify-start">
-            <Settings className="h-4 w-4 mr-3" />
-            Настройки
           </Button>
         </CardContent>
       </Card>

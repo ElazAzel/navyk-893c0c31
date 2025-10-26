@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Rocket, Sparkles } from 'lucide-react';
 import logo from "@/assets/logo.svg";
+import { TelegramAuthForm } from '@/components/TelegramAuthForm';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -90,16 +91,26 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Вход</TabsTrigger>
-                <TabsTrigger value="signup">Регистрация</TabsTrigger>
+            <Tabs defaultValue="telegram" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm">
+                <TabsTrigger value="telegram" className="text-xs sm:text-sm">Telegram</TabsTrigger>
+                <TabsTrigger value="signin" className="text-xs sm:text-sm">Email</TabsTrigger>
+                <TabsTrigger value="signup" className="text-xs sm:text-sm">Регистрация</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="signin" className="space-y-4 mt-6">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+              <TabsContent value="telegram" className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
+                <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Быстрый вход через Telegram. Получите код в боте и войдите за секунды.
+                  </p>
+                </div>
+                <TelegramAuthForm />
+              </TabsContent>
+
+              <TabsContent value="signin" className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
+                <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="signin-email" className="text-xs sm:text-sm">Email</Label>
                     <Input
                       id="signin-email"
                       type="email"
@@ -108,11 +119,12 @@ const Auth = () => {
                       onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
                       required
                       disabled={loading}
+                      className="text-sm sm:text-base h-9 sm:h-10"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Пароль</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="signin-password" className="text-xs sm:text-sm">Пароль</Label>
                     <Input
                       id="signin-password"
                       type="password"
@@ -121,12 +133,13 @@ const Auth = () => {
                       onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
                       required
                       disabled={loading}
+                      className="text-sm sm:text-base h-9 sm:h-10"
                     />
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full text-sm sm:text-base h-9 sm:h-10"
                     disabled={loading}
                   >
                     {loading ? 'Вход...' : 'Войти'}
@@ -134,10 +147,10 @@ const Auth = () => {
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup" className="space-y-4 mt-6">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Полное имя</Label>
+              <TabsContent value="signup" className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
+                <form onSubmit={handleSignUp} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="signup-name" className="text-xs sm:text-sm">Полное имя</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -146,11 +159,12 @@ const Auth = () => {
                       onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
                       required
                       disabled={loading}
+                      className="text-sm sm:text-base h-9 sm:h-10"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="signup-email" className="text-xs sm:text-sm">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -159,11 +173,12 @@ const Auth = () => {
                       onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                       required
                       disabled={loading}
+                      className="text-sm sm:text-base h-9 sm:h-10"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Пароль</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="signup-password" className="text-xs sm:text-sm">Пароль</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -173,6 +188,7 @@ const Auth = () => {
                       required
                       disabled={loading}
                       minLength={6}
+                      className="text-sm sm:text-base h-9 sm:h-10"
                     />
                     <p className="text-xs text-muted-foreground">
                       Минимум 6 символов
@@ -181,7 +197,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full text-sm sm:text-base h-9 sm:h-10"
                     disabled={loading}
                   >
                     {loading ? 'Регистрация...' : 'Зарегистрироваться'}

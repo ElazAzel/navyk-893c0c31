@@ -11,6 +11,7 @@ import JobsPage from "@/components/JobsPage";
 import MentorsPage from "@/components/MentorsPage";
 import ProfilePage from "@/components/ProfilePage";
 import GamificationPage from "@/components/GamificationPage";
+import { AccountSettings } from "@/components/AccountSettings";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -99,8 +100,11 @@ const Index = () => {
             isPro={isPro}
             onUpgrade={handleUpgrade}
             profile={profile}
+            onNavigate={setActiveTab}
           />
         );
+      case "settings":
+        return <AccountSettings />;
       default:
         return <HomePage onNavigate={setActiveTab} userName={userName} />;
     }
