@@ -40,6 +40,7 @@ const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   
   const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
+  const { updateQuestProgress } = require('@/hooks/useGamification').useGamification();
 
   useEffect(() => {
     loadEvents();
@@ -120,7 +121,12 @@ const EventsPage = () => {
           title: 'Успешно! 🎉',
           description: 'Вы зарегистрированы на мероприятие',
         });
-        loadEvents(); // Refresh to update participant count
+        
+        // Award XP for registering
+        await updateQuestProgress('register_event', 1);
+        
+        await loadEvents();
+        await loadRegistrations();
       }
     } catch (error) {
       console.error('Error registering:', error);

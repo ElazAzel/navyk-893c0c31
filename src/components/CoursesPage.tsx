@@ -42,6 +42,7 @@ const CoursesPage = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   
   const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
+  const { updateQuestProgress } = require('@/hooks/useGamification').useGamification();
 
   useEffect(() => {
     loadCourses();
@@ -121,6 +122,11 @@ const CoursesPage = () => {
           title: 'Успешно! 🎉',
           description: 'Вы записались на курс',
         });
+        
+        // Award XP for enrolling
+        await updateQuestProgress('enroll_course', 1);
+        
+        await loadEnrollments();
       }
     } catch (error) {
       console.error('Error enrolling:', error);
