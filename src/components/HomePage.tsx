@@ -1,6 +1,7 @@
-import { Brain, FileText, Briefcase, Users, Sparkles, TrendingUp, Trophy, BookOpen, Calendar } from "lucide-react";
+import { Brain, FileText, Briefcase, Users, Sparkles, Trophy, BookOpen, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { QuickStatsCard } from "@/components/QuickStatsCard";
 
 interface HomePageProps {
   onNavigate: (tab: string) => void;
@@ -99,29 +100,7 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <Card className="card-gradient border-border/50">
-          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
-            <div className="text-lg sm:text-2xl font-bold gradient-text mb-0.5 sm:mb-1">24</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Диалогов</div>
-          </CardContent>
-        </Card>
-        <Card className="card-gradient border-border/50">
-          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
-            <div className="text-lg sm:text-2xl font-bold text-success mb-0.5 sm:mb-1">3</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Резюме</div>
-          </CardContent>
-        </Card>
-        <Card className="card-gradient border-border/50">
-          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
-              <span className="text-lg sm:text-2xl font-bold text-accent">85%</span>
-            </div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Прогресс</div>
-          </CardContent>
-        </Card>
-      </div>
+      <QuickStatsCard />
 
       {/* Feature Cards */}
       <div className="space-y-3 sm:space-y-4">

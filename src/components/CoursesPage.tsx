@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BookOpen, Clock, Star, Users, Search, Play } from 'lucide-react';
+import { BookOpen, Clock, Star, Users, Search, Play, Bookmark, MessageSquare } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { useRatings } from '@/hooks/useRatings';
+import { RatingDialog } from '@/components/RatingDialog';
+import { Progress } from '@/components/ui/progress';
 
 interface Course {
   id: string;
@@ -33,10 +37,18 @@ const CoursesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  
+  const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
 
   useEffect(() => {
     loadCourses();
-  }, []);
+    if (user) {
+      loadEnrollments();
+    }
+  }, [user]);
 
   const loadCourses = async () => {
     try {
@@ -56,6 +68,25 @@ const CoursesPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadEnrollments = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      setEnrollments(data || []);
+    } catch (error) {
+      console.error('Error loading enrollments:', error);
+    }
+  };
+
+  const getEnrollment = (courseId: string) => {
+    return enrollments.find(e => e.course_id === courseId);
   };
 
   const handleEnroll = async (courseId: string) => {
@@ -174,17 +205,40 @@ const CoursesPage = () => {
 
       {/* Courses Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        {filteredCourses.map((course) => (
-          <Card key={course.id} className="border-border/50 hover:border-primary/50 transition-colors">
-            <CardHeader className="p-4 sm:p-6">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <Badge variant="secondary" className="text-xs">
-                  {course.category}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  {levelLabels[course.level]}
-                </Badge>
-              </div>
+        {filteredCourses.map((course) => {
+          const enrollment = getEnrollment(course.id);
+          const isEnrolled = !!enrollment;
+          
+          return (
+            <Card key={course.id} className="border-border/50 hover:border-primary/50 transition-colors">
+              <CardHeader className="p-4 sm:p-6">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {course.category}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {levelLabels[course.level]}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark('course', course.id);
+                    }}
+                  >
+                    <Bookmark
+                      className={`h-4 w-4 ${
+                        isBookmarked('course', course.id)
+                          ? 'fill-accent text-accent'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  </Button>
+                </div>
               
               <CardTitle className="text-base sm:text-lg line-clamp-2">
                 {course.title}
@@ -195,48 +249,84 @@ const CoursesPage = () => {
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{course.duration_hours}ч</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{course.lessons_count} уроков</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-yellow-500 text-yellow-500" />
-                  <span>{course.rating}</span>
-                </div>
-              </div>
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
+                {isEnrolled && enrollment.progress > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Прогресс</span>
+                      <span className="font-medium">{enrollment.progress}%</span>
+                    </div>
+                    <Progress value={enrollment.progress} className="h-2" />
+                  </div>
+                )}
 
-              <div className="flex items-center gap-2 text-xs sm:text-sm">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">{course.students_count} студентов</span>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-lg sm:text-xl font-bold">
-                  {course.price === 0 ? (
-                    <span className="text-green-500">Бесплатно</span>
-                  ) : (
-                    `${course.price.toLocaleString()}₸`
-                  )}
+                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>{course.duration_hours}ч</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>{course.lessons_count} уроков</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCourse(course);
+                      setRatingDialogOpen(true);
+                    }}
+                    className="flex items-center gap-1 hover:text-accent transition-colors"
+                  >
+                    <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-yellow-500 text-yellow-500" />
+                    <span>{course.rating}</span>
+                  </button>
                 </div>
-                
-                <Button 
-                  onClick={() => handleEnroll(course.id)}
-                  size="sm"
-                  className="text-xs sm:text-sm h-8 sm:h-9"
-                >
-                  <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
-                  Записаться
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">{course.students_count} студентов</span>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 gap-2">
+                  <div className="text-lg sm:text-xl font-bold">
+                    {course.price === 0 ? (
+                      <span className="text-green-500">Бесплатно</span>
+                    ) : (
+                      `${course.price.toLocaleString()}₸`
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {isEnrolled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCourse(course);
+                          setRatingDialogOpen(true);
+                        }}
+                        className="text-xs sm:text-sm h-8 sm:h-9"
+                      >
+                        <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        Отзыв
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={() => handleEnroll(course.id)}
+                      disabled={isEnrolled}
+                      size="sm"
+                      className="text-xs sm:text-sm h-8 sm:h-9"
+                    >
+                      <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
+                      {isEnrolled ? 'Записан' : 'Записаться'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {filteredCourses.length === 0 && (
@@ -249,6 +339,16 @@ const CoursesPage = () => {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {selectedCourse && (
+        <RatingDialog
+          open={ratingDialogOpen}
+          onOpenChange={setRatingDialogOpen}
+          contentType="course"
+          contentId={selectedCourse.id}
+          title={selectedCourse.title}
+        />
       )}
     </div>
   );

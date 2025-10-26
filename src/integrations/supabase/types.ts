@@ -188,6 +188,30 @@ export type Database = {
           },
         ]
       }
+      bookmarks: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           completed: boolean | null
@@ -651,6 +675,7 @@ export type Database = {
           bio: string | null
           created_at: string
           email: string
+          email_notifications: boolean | null
           email_verified: boolean | null
           full_name: string
           google_connected: boolean | null
@@ -659,6 +684,7 @@ export type Database = {
           phone: string | null
           phone_verified: boolean | null
           profile_visibility: string | null
+          push_notifications: boolean | null
           show_in_leaderboard: boolean | null
           telegram_id: number | null
           telegram_username: string | null
@@ -669,6 +695,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email: string
+          email_notifications?: boolean | null
           email_verified?: boolean | null
           full_name: string
           google_connected?: boolean | null
@@ -677,6 +704,7 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           profile_visibility?: string | null
+          push_notifications?: boolean | null
           show_in_leaderboard?: boolean | null
           telegram_id?: number | null
           telegram_username?: string | null
@@ -687,6 +715,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string
+          email_notifications?: boolean | null
           email_verified?: boolean | null
           full_name?: string
           google_connected?: boolean | null
@@ -695,10 +724,44 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           profile_visibility?: string | null
+          push_notifications?: boolean | null
           show_in_leaderboard?: boolean | null
           telegram_id?: number | null
           telegram_username?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ratings: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
