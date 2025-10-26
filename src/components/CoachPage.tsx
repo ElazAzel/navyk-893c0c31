@@ -1,21 +1,18 @@
-import { useState } from "react";
-import { Bot, Send, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Bot, Send, Sparkles, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import { useAIChat } from "@/hooks/useAIChat";
 
 const CoachPage = () => {
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const { messages, isLoading, sendMessage, clearMessages } = useAIChat(selectedCoach || "arif");
 
   const coaches = [
     {
@@ -44,27 +41,16 @@ const CoachPage = () => {
     }
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-      timestamp: new Date()
-    };
-
-    setMessages([...messages, userMessage]);
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+    const messageText = input;
     setInput("");
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: Message = {
-        role: "assistant",
-        content: "Отличный вопрос! Давайте разберем это вместе. На основе ваших навыков и интересов, я рекомендую рассмотреть...",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
+    await sendMessage(messageText);
   };
 
   if (!selectedCoach) {
@@ -141,9 +127,9 @@ const CoachPage = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => {
+            onClick={() => {
                 setSelectedCoach(null);
-                setMessages([]);
+                clearMessages();
               }}
             >
               ← Назад
@@ -207,6 +193,19 @@ const CoachPage = () => {
             </div>
           </div>
         ))}
+        {isLoading && (
+          <div className="flex gap-3">
+            <Avatar className={`h-8 w-8 flex items-center justify-center bg-gradient-to-br ${currentCoach?.color} text-2xl`}>
+              {currentCoach?.avatar}
+            </Avatar>
+            <div className="flex-1">
+              <div className="inline-block p-3 rounded-2xl bg-secondary">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -227,7 +226,7 @@ const CoachPage = () => {
           />
           <Button 
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             size="icon"
             className="bg-gradient-primary hover:opacity-90 shrink-0"
           >

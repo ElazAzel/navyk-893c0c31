@@ -50,6 +50,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_sessions: {
+        Row: {
+          coach_id: string
+          created_at: string
+          id: string
+          messages: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_credits: {
         Row: {
           created_at: string

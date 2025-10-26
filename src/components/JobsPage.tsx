@@ -3,8 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 const JobsPage = () => {
+  const { toast } = useToast();
+  const [savedJobs, setSavedJobs] = useState<number[]>([]);
   const jobs = [
     {
       id: 1,
@@ -40,6 +44,29 @@ const JobsPage = () => {
       match: 82
     }
   ];
+
+  const handleApply = (jobId: number, jobTitle: string) => {
+    toast({
+      title: "Заявка отправлена!",
+      description: `Ваш отклик на вакансию "${jobTitle}" успешно отправлен работодателю`,
+    });
+  };
+
+  const handleSaveJob = (jobId: number) => {
+    if (savedJobs.includes(jobId)) {
+      setSavedJobs(savedJobs.filter(id => id !== jobId));
+      toast({
+        title: "Удалено из сохраненных",
+        description: "Вакансия удалена из избранного",
+      });
+    } else {
+      setSavedJobs([...savedJobs, jobId]);
+      toast({
+        title: "Добавлено в избранное",
+        description: "Вакансия сохранена в избранное",
+      });
+    }
+  };
 
   return (
     <div className="space-y-4 pb-20">
@@ -125,8 +152,13 @@ const JobsPage = () => {
                   </div>
                 </div>
 
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <Bookmark className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="shrink-0"
+                  onClick={() => handleSaveJob(job.id)}
+                >
+                  <Bookmark className={`h-4 w-4 ${savedJobs.includes(job.id) ? 'fill-primary text-primary' : ''}`} />
                 </Button>
               </div>
             </CardHeader>
@@ -146,7 +178,11 @@ const JobsPage = () => {
                   </div>
                 </div>
 
-                <Button size="sm" className="bg-gradient-primary hover:opacity-90 text-white">
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-primary hover:opacity-90 text-white"
+                  onClick={() => handleApply(job.id, job.title)}
+                >
                   Откликнуться
                   <ExternalLink className="ml-2 h-3 w-3" />
                 </Button>

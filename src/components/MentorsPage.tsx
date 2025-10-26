@@ -3,8 +3,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
 
 const MentorsPage = () => {
+  const { toast } = useToast();
+
+  const handleContactMentor = (mentorName: string) => {
+    toast({
+      title: "Связь с ментором",
+      description: `Открывается чат с ${mentorName}...`,
+    });
+  };
+
+  const handleBookMentor = (mentorName: string, rate: string) => {
+    toast({
+      title: "Бронирование сессии",
+      description: `Бронируется консультация с ${mentorName} (${rate}/час)`,
+    });
+  };
+
+  const handleApplyMentor = () => {
+    toast({
+      title: "Заявка на менторство",
+      description: "Ваша заявка будет рассмотрена в течение 2-3 рабочих дней",
+    });
+  };
   const mentors = [
     {
       id: 1,
@@ -136,6 +159,7 @@ const MentorsPage = () => {
                     variant="outline" 
                     size="sm"
                     disabled={!mentor.available}
+                    onClick={() => handleContactMentor(mentor.name)}
                   >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Написать
@@ -144,6 +168,7 @@ const MentorsPage = () => {
                     size="sm"
                     className="bg-gradient-primary hover:opacity-90 text-white"
                     disabled={!mentor.available}
+                    onClick={() => handleBookMentor(mentor.name, mentor.rate)}
                   >
                     <Video className="h-4 w-4 mr-2" />
                     Забронировать
@@ -162,7 +187,12 @@ const MentorsPage = () => {
           <p className="text-white/80 text-sm mb-4">
             Делитесь опытом и зарабатывайте, помогая другим в карьерном развитии
           </p>
-          <Button variant="secondary" size="lg" className="font-semibold">
+          <Button 
+            variant="secondary" 
+            size="lg" 
+            className="font-semibold"
+            onClick={handleApplyMentor}
+          >
             Подать заявку
           </Button>
         </CardContent>
