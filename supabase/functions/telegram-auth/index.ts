@@ -16,6 +16,23 @@ interface VerifyCodeBody {
   telegram_username?: string;
 }
 
+// Validation functions
+function validateTelegramId(telegram_id: any): boolean {
+  return typeof telegram_id === 'number' && 
+         telegram_id > 0 && 
+         telegram_id <= 999999999999 && 
+         Number.isInteger(telegram_id);
+}
+
+function validateCode(code: any): boolean {
+  return typeof code === 'string' && /^\d{6}$/.test(code);
+}
+
+function validateUsername(username: any): boolean {
+  if (!username) return true; // Optional field
+  return typeof username === 'string' && /^@?[a-zA-Z0-9_]{5,32}$/.test(username);
+}
+
 function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -44,6 +61,47 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
   }
 }
 
+async function checkRateLimit(
+  supabase: any,
+  telegram_id: number,
+  action: 'request_code' | 'verify_code',
+  ip_address: string | null
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const windowMs = 5 * 60 * 1000; // 5 minutes
+  const maxRequests = action === 'request_code' ? 3 : 5;
+  
+  const windowStart = new Date(Date.now() - windowMs).toISOString();
+  
+  const { data, error } = await supabase
+    .from('telegram_rate_limit')
+    .select('created_at')
+    .eq('telegram_id', telegram_id)
+    .eq('action', action)
+    .gte('created_at', windowStart)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return { allowed: true }; // Fail open
+  }
+  
+  if (data && data.length >= maxRequests) {
+    const oldestRequest = new Date(data[data.length - 1].created_at).getTime();
+    const retryAfter = Math.ceil((oldestRequest + windowMs - Date.now()) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  
+  // Log this attempt
+  await supabase.from('telegram_rate_limit').insert({
+    telegram_id,
+    action,
+    ip_address,
+    success: true
+  });
+  
+  return { allowed: true };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -54,6 +112,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const ip_address = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
 
@@ -61,8 +120,37 @@ Deno.serve(async (req) => {
       const body: RequestCodeBody = await req.json();
       const { telegram_id, telegram_username } = body;
 
-      if (!telegram_id) {
-        throw new Error('telegram_id is required');
+      // Validate inputs
+      if (!validateTelegramId(telegram_id)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid telegram_id format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (telegram_username && !validateUsername(telegram_username)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid telegram_username format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check rate limit
+      const rateLimitCheck = await checkRateLimit(supabase, telegram_id, 'request_code', ip_address);
+      if (!rateLimitCheck.allowed) {
+        return new Response(
+          JSON.stringify({ 
+            error: `Слишком много попыток. Подождите ${rateLimitCheck.retryAfter} секунд` 
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Retry-After': rateLimitCheck.retryAfter!.toString()
+            } 
+          }
+        );
       }
 
       // Generate 6-digit code
@@ -79,6 +167,7 @@ Deno.serve(async (req) => {
           telegram_id,
           code,
           expires_at: expiresAt.toISOString(),
+          failed_attempts: 0
         });
 
       if (insertError) {
@@ -100,8 +189,44 @@ Deno.serve(async (req) => {
       const body: VerifyCodeBody = await req.json();
       const { telegram_id, code, telegram_username } = body;
 
-      if (!telegram_id || !code) {
-        throw new Error('telegram_id and code are required');
+      // Validate inputs
+      if (!validateTelegramId(telegram_id)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid telegram_id format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!validateCode(code)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid code format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (telegram_username && !validateUsername(telegram_username)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid telegram_username format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check rate limit
+      const rateLimitCheck = await checkRateLimit(supabase, telegram_id, 'verify_code', ip_address);
+      if (!rateLimitCheck.allowed) {
+        return new Response(
+          JSON.stringify({ 
+            error: `Слишком много попыток. Подождите ${rateLimitCheck.retryAfter} секунд` 
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'Retry-After': rateLimitCheck.retryAfter!.toString()
+            } 
+          }
+        );
       }
 
       // Verify code
@@ -115,7 +240,30 @@ Deno.serve(async (req) => {
         .single();
 
       if (codeError || !codeData) {
+        // Track failed attempt
+        await supabase
+          .from('telegram_rate_limit')
+          .insert({
+            telegram_id,
+            action: 'verify_code',
+            ip_address,
+            success: false
+          });
+        
         throw new Error('Invalid or expired code');
+      }
+
+      // Check failed attempts
+      if (codeData.failed_attempts >= 5) {
+        await supabase
+          .from('telegram_verification_codes')
+          .update({ used: true })
+          .eq('id', codeData.id);
+        
+        return new Response(
+          JSON.stringify({ error: 'Слишком много неверных попыток. Запросите новый код' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       // Mark code as used
@@ -185,8 +333,6 @@ Deno.serve(async (req) => {
             }
           );
         }
-
-        console.log('User created:', authData.user.id);
 
         // Wait a bit for trigger to complete
         await new Promise(resolve => setTimeout(resolve, 500));

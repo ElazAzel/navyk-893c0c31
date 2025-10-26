@@ -164,6 +164,51 @@ async function getGamificationActions(supabase: any) {
   };
 }
 
+// Rate limiting function
+async function checkRateLimit(supabase: any, userId: string, coachId: string): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const windowMs = 60 * 1000; // 1 minute
+  const maxRequests = 10;
+  
+  const windowStart = new Date(Date.now() - windowMs).toISOString();
+  
+  const { count, error } = await supabase
+    .from('ai_request_log')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', windowStart);
+  
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return { allowed: true }; // Fail open
+  }
+  
+  if (count !== null && count >= maxRequests) {
+    // Find oldest request to calculate retry time
+    const { data: oldestRequest } = await supabase
+      .from('ai_request_log')
+      .select('created_at')
+      .eq('user_id', userId)
+      .gte('created_at', windowStart)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+    
+    if (oldestRequest) {
+      const oldestTime = new Date(oldestRequest.created_at).getTime();
+      const retryAfter = Math.ceil((oldestTime + windowMs - Date.now()) / 1000);
+      return { allowed: false, retryAfter };
+    }
+  }
+  
+  // Log this request
+  await supabase.from('ai_request_log').insert({
+    user_id: userId,
+    coach_id: coachId
+  });
+  
+  return { allowed: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -181,6 +226,12 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
+    // Get user ID from auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
+
     const { messages, coachId } = await req.json();
     
     if (!messages || !coachId) {
@@ -190,14 +241,30 @@ serve(async (req) => {
       );
     }
 
+    // Check rate limit
+    const rateLimitCheck = await checkRateLimit(supabase, user.id, coachId);
+    if (!rateLimitCheck.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Слишком много запросов. Подождите ${rateLimitCheck.retryAfter} секунд 😊` 
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Retry-After": rateLimitCheck.retryAfter!.toString()
+          } 
+        }
+      );
+    }
+
     const systemPrompt = COACH_PROMPTS[coachId as keyof typeof COACH_PROMPTS] || COACH_PROMPTS.arif;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
-
-    console.log(`AI chat for coach: ${coachId}`);
 
     // First call - check if AI wants to use tools
     let aiMessages = [
@@ -242,15 +309,11 @@ serve(async (req) => {
 
     // Check if AI wants to use tools
     if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
-      console.log('AI requested tools:', choice.message.tool_calls);
-      
       // Execute all tool calls
       const toolResults = await Promise.all(
         choice.message.tool_calls.map(async (toolCall: any) => {
           const functionName = toolCall.function.name;
           const args = JSON.parse(toolCall.function.arguments);
-          
-          console.log(`Executing tool: ${functionName}`, args);
           
           let result;
           try {
