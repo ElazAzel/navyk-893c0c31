@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,7 +14,45 @@ export const useAIChat = (coachId: string) => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+
+  // Load chat history when component mounts
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user || !coachId) return;
+      
+      setIsLoadingHistory(true);
+      try {
+        const { data, error } = await supabase
+          .from('ai_chat_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('coach_id', coachId)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        if (data) {
+          setSessionId(data.id);
+          const loadedMessages = (data.messages as any[] || []).map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: new Date(m.timestamp || Date.now())
+          }));
+          setMessages(loadedMessages);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, [user, coachId]);
 
   const createSession = useCallback(async () => {
     if (!user) return null;
@@ -50,6 +88,8 @@ export const useAIChat = (coachId: string) => {
 
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
+
+    let assistantContent = "";
 
     try {
       // Create session if not exists
@@ -111,7 +151,6 @@ export const useAIChat = (coachId: string) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
-      let assistantContent = "";
       let streamDone = false;
 
       // Add empty assistant message
@@ -187,6 +226,31 @@ export const useAIChat = (coachId: string) => {
         }
       }
 
+      // Save chat to database after completion
+      if (currentSessionId && assistantContent) {
+        const updatedMessages = [...messages, userMessage, {
+          role: "assistant" as const,
+          content: assistantContent,
+          timestamp: new Date()
+        }];
+        
+        try {
+          await supabase
+            .from("ai_chat_sessions")
+            .update({
+              messages: updatedMessages.map(m => ({
+                role: m.role,
+                content: m.content,
+                timestamp: m.timestamp.toISOString()
+              })),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", currentSessionId);
+        } catch (error) {
+          console.error("Error saving session:", error);
+        }
+      }
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -209,6 +273,7 @@ export const useAIChat = (coachId: string) => {
   return {
     messages,
     isLoading,
+    isLoadingHistory,
     sendMessage,
     clearMessages,
   };

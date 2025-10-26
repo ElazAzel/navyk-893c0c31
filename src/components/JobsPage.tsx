@@ -69,65 +69,65 @@ const JobsPage = () => {
   };
 
   return (
-    <div className="space-y-4 pb-20">
+    <div className="space-y-3 sm:space-y-4 pb-20 px-1">
       <div>
-        <h1 className="text-2xl font-bold mb-1">Вакансии и стажировки</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1">Вакансии и стажировки</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Найдено {jobs.length} подходящих вакансий
         </p>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
         <Input 
           placeholder="Поиск по вакансиям..."
-          className="pl-10"
+          className="pl-9 sm:pl-10 text-sm"
         />
       </div>
 
       {/* Filter Chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <Badge variant="default" className="cursor-pointer whitespace-nowrap">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+        <Badge variant="default" className="cursor-pointer whitespace-nowrap text-xs">
           Все
         </Badge>
-        <Badge variant="outline" className="cursor-pointer whitespace-nowrap">
+        <Badge variant="outline" className="cursor-pointer whitespace-nowrap text-xs">
           Стажировки
         </Badge>
-        <Badge variant="outline" className="cursor-pointer whitespace-nowrap">
+        <Badge variant="outline" className="cursor-pointer whitespace-nowrap text-xs">
           Удаленно
         </Badge>
-        <Badge variant="outline" className="cursor-pointer whitespace-nowrap">
+        <Badge variant="outline" className="cursor-pointer whitespace-nowrap text-xs">
           IT
         </Badge>
-        <Badge variant="outline" className="cursor-pointer whitespace-nowrap">
+        <Badge variant="outline" className="cursor-pointer whitespace-nowrap text-xs">
           Менеджмент
         </Badge>
       </div>
 
       {/* Jobs List */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {jobs.map((job) => (
           <Card key={job.id} className="hover:shadow-md transition-base border-border/50">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-start gap-3 mb-2">
-                    <div className="bg-gradient-primary p-3 rounded-xl text-white font-bold text-xl">
+            <CardHeader className="p-3 sm:p-6">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-2 sm:gap-3 mb-2">
+                    <div className="bg-gradient-primary p-2 sm:p-3 rounded-lg sm:rounded-xl text-white font-bold text-base sm:text-xl shrink-0">
                       {job.company[0]}
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-1">{job.title}</CardTitle>
-                      <CardDescription className="font-medium">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm sm:text-lg mb-0.5 sm:mb-1 leading-tight">{job.title}</CardTitle>
+                      <CardDescription className="font-medium text-xs sm:text-sm">
                         {job.company}
                       </CardDescription>
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground mb-3">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      {job.location}
+                      <span className="truncate">{job.location}</span>
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
@@ -136,16 +136,16 @@ const JobsPage = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="secondary">{job.type}</Badge>
-                    <Badge variant="outline" className="text-success border-success/30">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
+                    <Badge variant="secondary" className="text-xs">{job.type}</Badge>
+                    <Badge variant="outline" className="text-success border-success/30 text-xs">
                       {job.salary}
                     </Badge>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {job.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
+                      <Badge key={tag} variant="outline" className="text-[10px] sm:text-xs">
                         {tag}
                       </Badge>
                     ))}
@@ -155,36 +155,36 @@ const JobsPage = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="shrink-0"
+                  className="shrink-0 h-8 w-8 sm:h-10 sm:w-10"
                   onClick={() => handleSaveJob(job.id)}
                 >
-                  <Bookmark className={`h-4 w-4 ${savedJobs.includes(job.id) ? 'fill-primary text-primary' : ''}`} />
+                  <Bookmark className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${savedJobs.includes(job.id) ? 'fill-primary text-primary' : ''}`} />
                 </Button>
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="text-xs text-muted-foreground">Совпадение</div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-secondary rounded-full h-2">
+            <CardContent className="pt-0 p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Совпадение</div>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                    <div className="w-16 sm:w-24 bg-secondary rounded-full h-1.5 sm:h-2">
                       <div 
                         className="bg-gradient-primary h-full rounded-full transition-all"
                         style={{ width: `${job.match}%` }}
                       />
                     </div>
-                    <span className="text-sm font-bold text-primary">{job.match}%</span>
+                    <span className="text-xs sm:text-sm font-bold text-primary">{job.match}%</span>
                   </div>
                 </div>
 
                 <Button 
                   size="sm" 
-                  className="bg-gradient-primary hover:opacity-90 text-white"
+                  className="bg-gradient-primary hover:opacity-90 text-white text-xs sm:text-sm w-full sm:w-auto"
                   onClick={() => handleApply(job.id, job.title)}
                 >
                   Откликнуться
-                  <ExternalLink className="ml-2 h-3 w-3" />
+                  <ExternalLink className="ml-1.5 sm:ml-2 h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
@@ -193,7 +193,7 @@ const JobsPage = () => {
       </div>
 
       {/* Load More */}
-      <Button variant="outline" className="w-full">
+      <Button variant="outline" className="w-full text-sm">
         Загрузить еще
       </Button>
     </div>

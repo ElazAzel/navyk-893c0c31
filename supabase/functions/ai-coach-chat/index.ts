@@ -87,25 +87,6 @@ serve(async (req) => {
       );
     }
 
-    // Save session to database if sessionId provided
-    if (sessionId) {
-      try {
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
-        await supabase
-          .from("ai_chat_sessions")
-          .update({
-            messages: messages,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", sessionId);
-      } catch (error) {
-        console.error("Error saving session:", error);
-      }
-    }
-
     // Return the streaming response
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },

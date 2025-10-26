@@ -52,28 +52,28 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
   ];
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 sm:space-y-6 pb-20 px-1">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-primary p-8 text-white">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-primary p-4 sm:p-8 text-white">
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-medium opacity-90">Добро пожаловать</span>
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="text-xs sm:text-sm font-medium opacity-90">Добро пожаловать</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
             Привет, {userName}! 👋
           </h1>
-          <p className="text-white/80 mb-6 max-w-md">
-            Давайте построим вашу карьеру вместе. Выберите инструмент и начните свой путь к успеху.
+          <p className="text-white/80 mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
+            Выберите инструмент и начните путь к успеху.
           </p>
           <Button 
             onClick={() => onNavigate("coach")}
             variant="secondary"
-            size="lg"
-            className="font-semibold"
+            size="default"
+            className="font-semibold text-sm sm:text-base"
           >
-            <Brain className="mr-2 h-5 w-5" />
-            Поговорить с AI Coach
+            <Brain className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+            AI Coach
           </Button>
         </div>
         
@@ -83,33 +83,33 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Card className="card-gradient border-border/50">
-          <CardContent className="pt-6 text-center">
-            <div className="text-2xl font-bold gradient-text mb-1">24</div>
-            <div className="text-xs text-muted-foreground">Диалогов с AI</div>
+          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
+            <div className="text-lg sm:text-2xl font-bold gradient-text mb-0.5 sm:mb-1">24</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Диалогов</div>
           </CardContent>
         </Card>
         <Card className="card-gradient border-border/50">
-          <CardContent className="pt-6 text-center">
-            <div className="text-2xl font-bold text-success mb-1">3</div>
-            <div className="text-xs text-muted-foreground">Резюме создано</div>
+          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
+            <div className="text-lg sm:text-2xl font-bold text-success mb-0.5 sm:mb-1">3</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Резюме</div>
           </CardContent>
         </Card>
         <Card className="card-gradient border-border/50">
-          <CardContent className="pt-6 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <TrendingUp className="h-4 w-4 text-accent" />
-              <span className="text-2xl font-bold text-accent">85%</span>
+          <CardContent className="pt-3 sm:pt-6 p-2 sm:p-6 text-center">
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
+              <span className="text-lg sm:text-2xl font-bold text-accent">85%</span>
             </div>
-            <div className="text-xs text-muted-foreground">Прогресс</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">Прогресс</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Feature Cards */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold px-1">Инструменты карьеры</h2>
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-bold px-1">Инструменты</h2>
         
         {features.map((feature) => {
           const Icon = feature.icon;
@@ -119,19 +119,19 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
               className="overflow-hidden border-border/50 hover:shadow-md transition-base cursor-pointer"
               onClick={() => onNavigate(feature.id)}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className={`bg-gradient-to-br ${feature.gradient} p-3 rounded-2xl`}>
-                    <Icon className="h-6 w-6 text-white" />
+              <CardHeader className="p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className={`bg-gradient-to-br ${feature.gradient} p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0`}>
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <Button variant="ghost" size="sm" className="font-medium">
+                  <Button variant="ghost" size="sm" className="font-medium text-xs sm:text-sm shrink-0">
                     {feature.action} →
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <CardTitle className="text-lg">{feature.title}</CardTitle>
-                <CardDescription className="text-sm">
+              <CardContent className="space-y-1.5 sm:space-y-2 p-3 pt-0 sm:p-6 sm:pt-0">
+                <CardTitle className="text-base sm:text-lg">{feature.title}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   {feature.description}
                 </CardDescription>
               </CardContent>
@@ -142,19 +142,19 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
 
       {/* CTA Section */}
       <Card className="bg-gradient-accent border-0 text-white">
-        <CardContent className="pt-6 text-center">
-          <Sparkles className="h-8 w-8 mx-auto mb-3" />
-          <h3 className="text-xl font-bold mb-2">Готовы к карьерному росту?</h3>
-          <p className="text-white/80 text-sm mb-4">
+        <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6 text-center">
+          <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 sm:mb-3" />
+          <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Готовы к карьерному росту?</h3>
+          <p className="text-white/80 text-xs sm:text-sm mb-3 sm:mb-4">
             Получите безлимитный доступ ко всем функциям с PRO подпиской
           </p>
           <Button 
             variant="secondary"
-            size="lg"
-            className="font-semibold"
+            size="default"
+            className="font-semibold text-sm sm:text-base"
             onClick={() => onNavigate("profile")}
           >
-            Узнать больше о PRO
+            Узнать о PRO
           </Button>
         </CardContent>
       </Card>
