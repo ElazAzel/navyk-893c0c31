@@ -175,33 +175,38 @@ export const useGamification = () => {
     if (!user) return;
 
     try {
-      const newTotalXP = userLevel.total_xp + xp;
-      const newLevel = getLevelFromXP(newTotalXP);
-      const xpForCurrentLevel = (newLevel - 1) * 100;
-      const newCurrentXP = newTotalXP - xpForCurrentLevel;
-
-      const { error } = await supabase
-        .from('user_levels')
-        .update({
-          level: newLevel,
-          current_xp: newCurrentXP,
-          total_xp: newTotalXP,
-        })
-        .eq('user_id', user.id);
+      const previousLevel = userLevel.level;
+      
+      // Use secure database function to add XP
+      const { error } = await supabase.rpc('add_xp_to_user', {
+        _user_id: user.id,
+        _xp_amount: xp
+      });
 
       if (error) throw error;
 
-      // Show level up notification
-      if (newLevel > userLevel.level) {
-        toast({
-          title: "🎉 Новый уровень!",
-          description: `Вы достигли ${newLevel} уровня! Получено ${xp} XP от ${source}`,
-        });
-      } else {
-        toast({
-          title: `+${xp} XP`,
-          description: source,
-        });
+      // Fetch updated level data
+      const { data: updatedLevel } = await supabase
+        .from('user_levels')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (updatedLevel) {
+        const newLevel = updatedLevel.level;
+        
+        // Show level up notification
+        if (newLevel > previousLevel) {
+          toast({
+            title: "🎉 Новый уровень!",
+            description: `Вы достигли ${newLevel} уровня! Получено ${xp} XP от ${source}`,
+          });
+        } else {
+          toast({
+            title: `+${xp} XP`,
+            description: source,
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error adding XP:', error);
@@ -232,22 +237,12 @@ export const useGamification = () => {
         await addXP(achievement.xp_reward, achievement.name);
       }
 
-      // Add credits reward
+      // Add credits reward using secure function
       if (achievement.credits_reward > 0) {
-        const { data: credits } = await supabase
-          .from('ai_credits')
-          .select('credits_remaining')
-          .eq('user_id', user.id)
-          .single();
-
-        if (credits) {
-          await supabase
-            .from('ai_credits')
-            .update({
-              credits_remaining: credits.credits_remaining + achievement.credits_reward,
-            })
-            .eq('user_id', user.id);
-        }
+        await supabase.rpc('add_credits', {
+          _user_id: user.id,
+          _amount: achievement.credits_reward
+        });
       }
 
       toast({
@@ -305,20 +300,10 @@ export const useGamification = () => {
         }
 
         if (quest.credits_reward > 0) {
-          const { data: credits } = await supabase
-            .from('ai_credits')
-            .select('credits_remaining')
-            .eq('user_id', user.id)
-            .single();
-
-          if (credits) {
-            await supabase
-              .from('ai_credits')
-              .update({
-                credits_remaining: credits.credits_remaining + quest.credits_reward,
-              })
-              .eq('user_id', user.id);
-          }
+          await supabase.rpc('add_credits', {
+            _user_id: user.id,
+            _amount: quest.credits_reward
+          });
         }
 
         toast({

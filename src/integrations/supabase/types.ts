@@ -757,6 +757,18 @@ export type Database = {
       }
     }
     Functions: {
+      add_credits: {
+        Args: { _amount: number; _user_id: string }
+        Returns: undefined
+      }
+      add_xp_to_user: {
+        Args: { _user_id: string; _xp_amount: number }
+        Returns: undefined
+      }
+      deduct_credits: {
+        Args: { _amount: number; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
