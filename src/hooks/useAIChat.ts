@@ -153,12 +153,10 @@ export const useAIChat = (coachId: string) => {
       let textBuffer = "";
       let streamDone = false;
 
-      // Add empty assistant message
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "",
-        timestamp: new Date()
-      }]);
+      // Streaming with message splitting
+      let fullResponse = "";
+      const messageChunks: string[] = [];
+      let currentChunkIndex = 0;
 
       while (!streamDone) {
         const { done, value } = await reader.read();
@@ -184,18 +182,9 @@ export const useAIChat = (coachId: string) => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const newMessages = [...prev];
-                const lastMsg = newMessages[newMessages.length - 1];
-                if (lastMsg && lastMsg.role === "assistant") {
-                  lastMsg.content = assistantContent;
-                }
-                return newMessages;
-              });
+              fullResponse += content;
             }
           } catch (e) {
-            // Incomplete JSON, put it back
             textBuffer = line + "\n" + textBuffer;
             break;
           }
@@ -212,37 +201,83 @@ export const useAIChat = (coachId: string) => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const newMessages = [...prev];
-                const lastMsg = newMessages[newMessages.length - 1];
-                if (lastMsg && lastMsg.role === "assistant") {
-                  lastMsg.content = assistantContent;
-                }
-                return newMessages;
-              });
+              fullResponse += content;
             }
           } catch { /* ignore */ }
         }
       }
 
+      // Split response into short messages
+      if (fullResponse) {
+        const sentences = fullResponse.match(/[^.!?\n]+[.!?\n]+/g) || [fullResponse];
+        let currentChunk = "";
+        
+        for (const sentence of sentences) {
+          if (currentChunk.length + sentence.length > 150 && currentChunk) {
+            messageChunks.push(currentChunk.trim());
+            currentChunk = sentence;
+          } else {
+            currentChunk += sentence;
+          }
+        }
+        
+        if (currentChunk.trim()) {
+          messageChunks.push(currentChunk.trim());
+        }
+
+        // Display messages one by one with delay
+        const displayNextChunk = () => {
+          if (currentChunkIndex >= messageChunks.length) {
+            assistantContent = messageChunks.join('\n\n');
+            return;
+          }
+
+          const chunk = messageChunks[currentChunkIndex];
+          setMessages(prev => [...prev, {
+            role: "assistant",
+            content: chunk,
+            timestamp: new Date()
+          }]);
+
+          currentChunkIndex++;
+          
+          if (currentChunkIndex < messageChunks.length) {
+            setTimeout(displayNextChunk, 1200);
+          } else {
+            assistantContent = messageChunks.join('\n\n');
+          }
+        };
+
+        displayNextChunk();
+      }
+
       // Save chat to database after completion
-      if (currentSessionId && assistantContent) {
-        const updatedMessages = [...messages, userMessage, {
+      if (currentSessionId && fullResponse) {
+        const allNewMessages = messageChunks.map((chunk, idx) => ({
           role: "assistant" as const,
-          content: assistantContent,
-          timestamp: new Date()
-        }];
+          content: chunk,
+          timestamp: new Date(Date.now() + idx * 1200).toISOString()
+        }));
+
+        const updatedMessages = [
+          ...messages.map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: m.timestamp.toISOString()
+          })),
+          {
+            role: "user" as const,
+            content: userMessage.content,
+            timestamp: userMessage.timestamp.toISOString()
+          },
+          ...allNewMessages
+        ];
         
         try {
           await supabase
             .from("ai_chat_sessions")
             .update({
-              messages: updatedMessages.map(m => ({
-                role: m.role,
-                content: m.content,
-                timestamp: m.timestamp.toISOString()
-              })),
+              messages: updatedMessages,
               updated_at: new Date().toISOString(),
             })
             .eq("id", currentSessionId);
