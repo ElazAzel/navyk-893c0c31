@@ -743,7 +743,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          achievements_count: number | null
+          anonymous_name: string | null
+          full_name: string | null
+          level: number | null
+          rank: number | null
+          total_score: number | null
+          total_xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
