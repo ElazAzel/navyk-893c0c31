@@ -3,13 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, MapPin, Users, Video, Search, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Users, Video, Ticket, Bookmark, Star, MessageSquare } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { SearchAndFilter } from '@/components/SearchAndFilter';
+import { RatingDialog } from '@/components/RatingDialog';
 
 interface Event {
   id: string;
@@ -33,11 +34,19 @@ const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  
+  const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
 
   useEffect(() => {
     loadEvents();
-  }, []);
+    if (user) {
+      loadRegistrations();
+    }
+  }, [user]);
 
   const loadEvents = async () => {
     try {
@@ -58,6 +67,25 @@ const EventsPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadRegistrations = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      setRegistrations(data || []);
+    } catch (error) {
+      console.error('Error loading registrations:', error);
+    }
+  };
+
+  const isRegistered = (eventId: string) => {
+    return registrations.some(r => r.event_id === eventId);
   };
 
   const handleRegister = async (eventId: string) => {
@@ -107,9 +135,12 @@ const EventsPage = () => {
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = typeFilter === 'all' || event.event_type === typeFilter;
+    const matchesType = !filters.type || event.event_type === filters.type;
+    const matchesFormat = !filters.format || 
+      (filters.format === 'online' && event.is_online) ||
+      (filters.format === 'offline' && !event.is_online);
     
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesFormat;
   });
 
   const eventTypeLabels: Record<string, string> = {
@@ -143,52 +174,71 @@ const EventsPage = () => {
       </div>
 
       {/* Filters */}
-      <Card className="border-border/50">
-        <CardContent className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Поиск мероприятий..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 text-sm sm:text-base h-9 sm:h-10"
-            />
-          </div>
-
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
-              <SelectValue placeholder="Тип мероприятия" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все типы</SelectItem>
-              <SelectItem value="webinar">Вебинары</SelectItem>
-              <SelectItem value="workshop">Воркшопы</SelectItem>
-              <SelectItem value="meetup">Митапы</SelectItem>
-              <SelectItem value="conference">Конференции</SelectItem>
-              <SelectItem value="hackathon">Хакатоны</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+      <SearchAndFilter
+        onSearch={setSearchQuery}
+        onFilterChange={setFilters}
+        placeholder="Поиск мероприятий..."
+        filterOptions={[
+          {
+            label: "Тип",
+            key: "type",
+            options: [
+              { value: "webinar", label: "Вебинары" },
+              { value: "workshop", label: "Воркшопы" },
+              { value: "meetup", label: "Митапы" },
+              { value: "conference", label: "Конференции" },
+              { value: "hackathon", label: "Хакатоны" },
+            ],
+          },
+          {
+            label: "Формат",
+            key: "format",
+            options: [
+              { value: "online", label: "Онлайн" },
+              { value: "offline", label: "Оффлайн" },
+            ],
+          },
+        ]}
+      />
 
       {/* Events List */}
       <div className="space-y-3 sm:space-y-4">
         {filteredEvents.map((event) => {
           const isFull = event.max_participants && event.current_participants >= event.max_participants;
+          const registered = isRegistered(event.id);
           
           return (
             <Card key={event.id} className="border-border/50 hover:border-primary/50 transition-colors">
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <Badge className={`${eventTypeColors[event.event_type]} text-xs`}>
-                    {eventTypeLabels[event.event_type]}
-                  </Badge>
-                  {event.is_online && (
-                    <Badge variant="outline" className="text-xs">
-                      <Video className="h-3 w-3 mr-1" />
-                      Онлайн
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge className={`${eventTypeColors[event.event_type]} text-xs`}>
+                      {eventTypeLabels[event.event_type]}
                     </Badge>
-                  )}
+                    {event.is_online && (
+                      <Badge variant="outline" className="text-xs">
+                        <Video className="h-3 w-3 mr-1" />
+                        Онлайн
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark('event', event.id);
+                    }}
+                  >
+                    <Bookmark
+                      className={`h-4 w-4 ${
+                        isBookmarked('event', event.id)
+                          ? 'fill-accent text-accent'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  </Button>
                 </div>
                 
                 <CardTitle className="text-base sm:text-lg">
@@ -226,7 +276,7 @@ const EventsPage = () => {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-2 gap-2">
                   <div className="text-lg sm:text-xl font-bold">
                     {event.price === 0 ? (
                       <span className="text-green-500">Бесплатно</span>
@@ -235,15 +285,32 @@ const EventsPage = () => {
                     )}
                   </div>
                   
-                  <Button 
-                    onClick={() => handleRegister(event.id)}
-                    disabled={isFull}
-                    size="sm"
-                    className="text-xs sm:text-sm h-8 sm:h-9"
-                  >
-                    <Ticket className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
-                    {isFull ? 'Мест нет' : 'Регистрация'}
-                  </Button>
+                  <div className="flex gap-2">
+                    {registered && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEvent(event);
+                          setRatingDialogOpen(true);
+                        }}
+                        className="text-xs sm:text-sm h-8 sm:h-9"
+                      >
+                        <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        Оценить
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={() => handleRegister(event.id)}
+                      disabled={isFull || registered}
+                      size="sm"
+                      className="text-xs sm:text-sm h-8 sm:h-9"
+                    >
+                      <Ticket className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
+                      {isFull ? 'Мест нет' : registered ? 'Зарегистрирован' : 'Регистрация'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -261,6 +328,16 @@ const EventsPage = () => {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {selectedEvent && (
+        <RatingDialog
+          open={ratingDialogOpen}
+          onOpenChange={setRatingDialogOpen}
+          contentType="event"
+          contentId={selectedEvent.id}
+          title={selectedEvent.title}
+        />
       )}
     </div>
   );
