@@ -153,6 +153,142 @@ export type Database = {
           },
         ]
       }
+      booking_payments: {
+        Row: {
+          amount_paid: number
+          booking_id: string
+          created_at: string
+          id: string
+          payment_status: string | null
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          amount_paid: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          payment_status?: string | null
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          amount_paid?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          payment_status?: string | null
+          stripe_payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "mentor_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_enrollments: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          course_id: string
+          enrolled_at: string
+          id: string
+          progress: number | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id: string
+          enrolled_at?: string
+          id?: string
+          progress?: number | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id?: string
+          enrolled_at?: string
+          id?: string
+          progress?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          duration_hours: number
+          id: string
+          instructor_avatar: string | null
+          instructor_name: string
+          is_published: boolean | null
+          lessons_count: number | null
+          level: string
+          price: number
+          rating: number | null
+          students_count: number | null
+          tags: Json | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          duration_hours: number
+          id?: string
+          instructor_avatar?: string | null
+          instructor_name: string
+          is_published?: boolean | null
+          lessons_count?: number | null
+          level: string
+          price?: number
+          rating?: number | null
+          students_count?: number | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          duration_hours?: number
+          id?: string
+          instructor_avatar?: string | null
+          instructor_name?: string
+          is_published?: boolean | null
+          lessons_count?: number | null
+          level?: string
+          price?: number
+          rating?: number | null
+          students_count?: number | null
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       daily_quests: {
         Row: {
           code: string
@@ -186,6 +322,107 @@ export type Database = {
           quest_type?: string
           required_count?: number
           xp_reward?: number
+        }
+        Relationships: []
+      }
+      event_registrations: {
+        Row: {
+          attended_at: string | null
+          event_id: string
+          id: string
+          registered_at: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          attended_at?: string | null
+          event_id: string
+          id?: string
+          registered_at?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          attended_at?: string | null
+          event_id?: string
+          id?: string
+          registered_at?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          current_participants: number | null
+          description: string
+          end_date: string
+          event_type: string
+          id: string
+          is_online: boolean | null
+          is_published: boolean | null
+          location: string | null
+          max_participants: number | null
+          meeting_url: string | null
+          organizer_avatar: string | null
+          organizer_name: string
+          price: number | null
+          start_date: string
+          tags: Json | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_participants?: number | null
+          description: string
+          end_date: string
+          event_type: string
+          id?: string
+          is_online?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          meeting_url?: string | null
+          organizer_avatar?: string | null
+          organizer_name: string
+          price?: number | null
+          start_date: string
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_participants?: number | null
+          description?: string
+          end_date?: string
+          event_type?: string
+          id?: string
+          is_online?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          meeting_url?: string | null
+          organizer_avatar?: string | null
+          organizer_name?: string
+          price?: number | null
+          start_date?: string
+          tags?: Json | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -421,6 +658,8 @@ export type Database = {
           location: string | null
           phone: string | null
           phone_verified: boolean | null
+          profile_visibility: string | null
+          show_in_leaderboard: boolean | null
           telegram_id: number | null
           telegram_username: string | null
           updated_at: string
@@ -437,6 +676,8 @@ export type Database = {
           location?: string | null
           phone?: string | null
           phone_verified?: boolean | null
+          profile_visibility?: string | null
+          show_in_leaderboard?: boolean | null
           telegram_id?: number | null
           telegram_username?: string | null
           updated_at?: string
@@ -453,6 +694,8 @@ export type Database = {
           location?: string | null
           phone?: string | null
           phone_verified?: boolean | null
+          profile_visibility?: string | null
+          show_in_leaderboard?: boolean | null
           telegram_id?: number | null
           telegram_username?: string | null
           updated_at?: string
@@ -820,6 +1063,16 @@ export type Database = {
           level: number | null
           rank: number | null
           total_score: number | null
+          total_xp: number | null
+        }
+        Relationships: []
+      }
+      leaderboard_secure: {
+        Row: {
+          achievements_count: number | null
+          full_name: string | null
+          level: number | null
+          rank: number | null
           total_xp: number | null
         }
         Relationships: []
