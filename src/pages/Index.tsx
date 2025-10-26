@@ -16,6 +16,7 @@ import EventsPage from "@/components/EventsPage";
 import BookmarksPage from "@/components/BookmarksPage";
 import AnalyticsPage from "@/components/AnalyticsPage";
 import { AccountSettings } from "@/components/AccountSettings";
+import { LeaderboardPage } from "@/components/social/LeaderboardPage";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { toast } from "sonner";
@@ -107,6 +108,8 @@ const Index = () => {
         return <AnalyticsPage />;
       case "gamification":
         return <GamificationPage />;
+      case "leaderboard":
+        return <LeaderboardPage />;
       case "profile":
         return (
           <ProfilePage

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy, BookOpen, Calendar, Shield, Bookmark, TrendingUp } from "lucide-react";
+import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy, BookOpen, Calendar, Shield, Bookmark, TrendingUp, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -30,6 +30,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: "analytics", icon: TrendingUp, label: "Аналитика" },
     { id: "jobs", icon: Briefcase, label: "Вакансии" },
     { id: "bookmarks", icon: Bookmark, label: "Закладки" },
+    { id: "leaderboard", icon: Crown, label: "Рейтинг" },
     ...(isAdmin ? [{ id: "admin", icon: Shield, label: "Админ" }] : []),
     { id: "profile", icon: User, label: "Профиль" },
   ];
