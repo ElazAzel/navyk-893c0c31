@@ -17,6 +17,7 @@ import BookmarksPage from "@/components/BookmarksPage";
 import AnalyticsPage from "@/components/AnalyticsPage";
 import { AccountSettings } from "@/components/AccountSettings";
 import { LeaderboardPage } from "@/components/social/LeaderboardPage";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { toast } from "sonner";
@@ -136,6 +137,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OfflineIndicator />
       <Header credits={credits.credits_remaining} isPro={isPro} onUpgrade={handleUpgrade} />
       
       <main className="max-w-screen-xl mx-auto px-4 py-4">
