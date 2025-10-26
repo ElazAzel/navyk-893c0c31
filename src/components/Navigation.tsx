@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy, BookOpen, Calendar } from "lucide-react";
+import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy, BookOpen, Calendar, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,7 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const { signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const navItems = [
@@ -29,6 +31,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: "events", icon: Calendar, label: "События" },
     { id: "jobs", icon: Briefcase, label: "Вакансии" },
     { id: "mentors", icon: Users, label: "Менторы" },
+    ...(isAdmin ? [{ id: "admin", icon: Shield, label: "Админ" }] : []),
     { id: "profile", icon: User, label: "Профиль" },
   ];
 

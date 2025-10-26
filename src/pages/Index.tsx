@@ -14,6 +14,8 @@ import GamificationPage from "@/components/GamificationPage";
 import CoursesPage from "@/components/CoursesPage";
 import EventsPage from "@/components/EventsPage";
 import { AccountSettings } from "@/components/AccountSettings";
+import AdminDashboard from "@/components/admin/AdminDashboard";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -27,6 +29,7 @@ const Index = () => {
   const { user } = useAuth();
   const { profile, credits, subscription, loading, isPro } = useUserProfile();
   const { updateQuestProgress } = useGamification();
+  const { isAdmin } = useAdminRole();
   const [activeTab, setActiveTab] = useState("home");
 
   const userName = profile?.full_name || "Пользователь";
@@ -111,6 +114,8 @@ const Index = () => {
         );
       case "settings":
         return <AccountSettings />;
+      case "admin":
+        return isAdmin ? <AdminDashboard /> : <HomePage onNavigate={setActiveTab} userName={userName} />;
       default:
         return <HomePage onNavigate={setActiveTab} userName={userName} />;
     }
