@@ -122,6 +122,30 @@ export type Database = {
           },
         ]
       }
+      ai_request_log: {
+        Row: {
+          coach_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_sessions: {
         Row: {
           coach_type: Database["public"]["Enums"]["coach_type"]
@@ -1006,11 +1030,39 @@ export type Database = {
           },
         ]
       }
+      telegram_rate_limit: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          success: boolean
+          telegram_id: number
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          telegram_id: number
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          telegram_id?: number
+        }
+        Relationships: []
+      }
       telegram_verification_codes: {
         Row: {
           code: string
           created_at: string
           expires_at: string
+          failed_attempts: number
           id: string
           telegram_id: number
           used: boolean | null
@@ -1019,6 +1071,7 @@ export type Database = {
           code: string
           created_at?: string
           expires_at: string
+          failed_attempts?: number
           id?: string
           telegram_id: number
           used?: boolean | null
@@ -1027,6 +1080,7 @@ export type Database = {
           code?: string
           created_at?: string
           expires_at?: string
+          failed_attempts?: number
           id?: string
           telegram_id?: number
           used?: boolean | null
@@ -1482,6 +1536,7 @@ export type Database = {
         Returns: undefined
       }
       cleanup_expired_verification_codes: { Args: never; Returns: undefined }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       deduct_credits: {
         Args: { _amount: number; _user_id: string }
         Returns: boolean
