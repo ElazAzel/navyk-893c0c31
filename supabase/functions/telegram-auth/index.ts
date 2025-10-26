@@ -160,21 +160,36 @@ Deno.serve(async (req) => {
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } else {
-        // New user - create anonymous auth user and profile
+        // New user - generate random password and create user
+        const randomPassword = crypto.randomUUID();
+        
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: `telegram_${telegram_id}@navyk.app`,
+          email: `tg${telegram_id}@navyk.app`,
+          password: randomPassword,
           email_confirm: true,
           user_metadata: {
             telegram_id,
             telegram_username,
-            full_name: telegram_username || `User ${telegram_id}`,
+            full_name: telegram_username || `Пользователь ${telegram_id}`,
+            is_telegram_user: true,
           },
         });
 
         if (authError || !authData.user) {
           console.error('Error creating user:', authError);
-          throw new Error('Failed to create user');
+          return new Response(
+            JSON.stringify({ error: 'Не удалось создать пользователя. Попробуйте снова.' }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
         }
+
+        console.log('User created:', authData.user.id);
+
+        // Wait a bit for trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Update profile with Telegram data
         const { error: profileError } = await supabase
@@ -196,7 +211,14 @@ Deno.serve(async (req) => {
         });
 
         if (sessionError || !session) {
-          throw new Error('Failed to create session');
+          console.error('Error creating session:', sessionError);
+          return new Response(
+            JSON.stringify({ error: 'Не удалось создать сессию' }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
         }
 
         return new Response(
