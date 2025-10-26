@@ -746,7 +746,7 @@ export type Database = {
       leaderboard: {
         Row: {
           achievements_count: number | null
-          anonymous_name: string | null
+          anonymous_id: string | null
           full_name: string | null
           level: number | null
           rank: number | null
