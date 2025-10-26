@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy } from "lucide-react";
+import { Home, MessageSquare, FileText, Briefcase, Users, User, LogOut, Trophy, BookOpen, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -24,11 +24,11 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   const navItems = [
     { id: "home", icon: Home, label: "Главная" },
-    { id: "coach", icon: MessageSquare, label: "AI Coach" },
-    { id: "resume", icon: FileText, label: "Резюме" },
+    { id: "coach", icon: MessageSquare, label: "Coach" },
+    { id: "courses", icon: BookOpen, label: "Курсы" },
+    { id: "events", icon: Calendar, label: "События" },
     { id: "jobs", icon: Briefcase, label: "Вакансии" },
     { id: "mentors", icon: Users, label: "Менторы" },
-    { id: "gamification", icon: Trophy, label: "Награды" },
     { id: "profile", icon: User, label: "Профиль" },
   ];
 

@@ -11,6 +11,8 @@ import JobsPage from "@/components/JobsPage";
 import MentorsPage from "@/components/MentorsPage";
 import ProfilePage from "@/components/ProfilePage";
 import GamificationPage from "@/components/GamificationPage";
+import CoursesPage from "@/components/CoursesPage";
+import EventsPage from "@/components/EventsPage";
 import { AccountSettings } from "@/components/AccountSettings";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -84,6 +86,10 @@ const Index = () => {
         return <HomePage onNavigate={setActiveTab} userName={userName} />;
       case "coach":
         return <CoachPage />;
+      case "courses":
+        return <CoursesPage />;
+      case "events":
+        return <EventsPage />;
       case "resume":
         return <ResumePage />;
       case "jobs":

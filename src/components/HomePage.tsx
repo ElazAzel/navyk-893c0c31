@@ -1,4 +1,4 @@
-import { Brain, FileText, Briefcase, Users, Sparkles, TrendingUp, Trophy } from "lucide-react";
+import { Brain, FileText, Briefcase, Users, Sparkles, TrendingUp, Trophy, BookOpen, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +16,22 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
       description: "Персональный AI-наставник для вашей карьеры",
       gradient: "from-primary to-blue-500",
       action: "Начать чат"
+    },
+    {
+      id: "courses",
+      icon: BookOpen,
+      title: "Курсы",
+      description: "Обучайся у лучших экспертов индустрии",
+      gradient: "from-indigo-500 to-purple-500",
+      action: "Смотреть курсы"
+    },
+    {
+      id: "events",
+      icon: Calendar,
+      title: "Мероприятия",
+      description: "Участвуй в митапах, воркшопах и хакатонах",
+      gradient: "from-pink-500 to-rose-500",
+      action: "Найти событие"
     },
     {
       id: "resume",
