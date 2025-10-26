@@ -556,6 +556,42 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_paths: {
+        Row: {
+          category: string
+          course_ids: string[] | null
+          created_at: string
+          description: string
+          estimated_hours: number
+          id: string
+          level: string
+          skills_gained: string[] | null
+          title: string
+        }
+        Insert: {
+          category: string
+          course_ids?: string[] | null
+          created_at?: string
+          description: string
+          estimated_hours: number
+          id?: string
+          level: string
+          skills_gained?: string[] | null
+          title: string
+        }
+        Update: {
+          category?: string
+          course_ids?: string[] | null
+          created_at?: string
+          description?: string
+          estimated_hours?: number
+          id?: string
+          level?: string
+          skills_gained?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       mentor_bookings: {
         Row: {
           amount_paid: number | null
@@ -916,6 +952,36 @@ export type Database = {
           },
         ]
       }
+      user_activity_log: {
+        Row: {
+          activity_type: string
+          content_id: string | null
+          content_type: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          content_id?: string | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          content_id?: string | null
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_daily_progress: {
         Row: {
           completed: boolean
@@ -966,6 +1032,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          goal_type: string
+          id: string
+          progress: number | null
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          goal_type: string
+          id?: string
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          goal_type?: string
+          id?: string
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_levels: {
         Row: {
@@ -1033,6 +1138,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_skills: {
+        Row: {
+          created_at: string
+          endorsed_by: string[] | null
+          id: string
+          last_practiced: string | null
+          progress: number | null
+          skill_level: string
+          skill_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endorsed_by?: string[] | null
+          id?: string
+          last_practiced?: string | null
+          progress?: number | null
+          skill_level: string
+          skill_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endorsed_by?: string[] | null
+          id?: string
+          last_practiced?: string | null
+          progress?: number | null
+          skill_level?: string
+          skill_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_stats: {
         Row: {

@@ -2,6 +2,8 @@ import { Brain, FileText, Briefcase, Users, Sparkles, Trophy, BookOpen, Calendar
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QuickStatsCard } from "@/components/QuickStatsCard";
+import { PersonalizedRecommendations } from "@/components/personalization/PersonalizedRecommendations";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HomePageProps {
   onNavigate: (tab: string) => void;
@@ -9,14 +11,15 @@ interface HomePageProps {
 }
 
 const HomePage = ({ onNavigate, userName }: HomePageProps) => {
+  const { user } = useAuth();
   const features = [
     {
-      id: "coach",
-      icon: Brain,
-      title: "AI Career Coach",
-      description: "Персональный AI-наставник для вашей карьеры",
-      gradient: "from-primary to-blue-500",
-      action: "Начать чат"
+      id: "analytics",
+      icon: Trophy,
+      title: "Аналитика",
+      description: "Отслеживайте прогресс и достигайте целей",
+      gradient: "from-accent to-orange-500",
+      action: "Смотреть аналитику"
     },
     {
       id: "courses",
@@ -35,36 +38,12 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
       action: "Найти событие"
     },
     {
-      id: "resume",
-      icon: FileText,
-      title: "Resume Builder",
-      description: "Создайте профессиональное резюме за минуты",
-      gradient: "from-accent to-orange-500",
-      action: "Создать резюме"
-    },
-    {
       id: "jobs",
       icon: Briefcase,
-      title: "Job Finder",
+      title: "Вакансии",
       description: "Найдите стажировки и вакансии, подходящие вам",
       gradient: "from-success to-emerald-500",
       action: "Искать вакансии"
-    },
-    {
-      id: "mentors",
-      icon: Users,
-      title: "Mentorship",
-      description: "Забронируйте встречу с опытными экспертами",
-      gradient: "from-purple-500 to-pink-500",
-      action: "Найти ментора"
-    },
-    {
-      id: "gamification",
-      icon: Trophy,
-      title: "Геймификация",
-      description: "Получайте награды и достигайте новых уровней",
-      gradient: "from-yellow-500 to-orange-500",
-      action: "Смотреть награды"
     }
   ];
 
@@ -101,6 +80,11 @@ const HomePage = ({ onNavigate, userName }: HomePageProps) => {
 
       {/* Quick Stats */}
       <QuickStatsCard />
+
+      {/* Personalized Recommendations */}
+      {user && (
+        <PersonalizedRecommendations userId={user.id} onNavigate={onNavigate} />
+      )}
 
       {/* Feature Cards */}
       <div className="space-y-3 sm:space-y-4">

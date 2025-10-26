@@ -14,6 +14,7 @@ import GamificationPage from "@/components/GamificationPage";
 import CoursesPage from "@/components/CoursesPage";
 import EventsPage from "@/components/EventsPage";
 import BookmarksPage from "@/components/BookmarksPage";
+import AnalyticsPage from "@/components/AnalyticsPage";
 import { AccountSettings } from "@/components/AccountSettings";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -102,6 +103,8 @@ const Index = () => {
         return <MentorsPage />;
       case "bookmarks":
         return <BookmarksPage />;
+      case "analytics":
+        return <AnalyticsPage />;
       case "gamification":
         return <GamificationPage />;
       case "profile":
