@@ -11,6 +11,7 @@ import { ru } from 'date-fns/locale';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { SearchAndFilter } from '@/components/SearchAndFilter';
 import { RatingDialog } from '@/components/RatingDialog';
+import { useGamification } from '@/hooks/useGamification';
 
 interface Event {
   id: string;
@@ -40,7 +41,7 @@ const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   
   const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
-  const { updateQuestProgress } = require('@/hooks/useGamification').useGamification();
+  const { updateQuestProgress } = useGamification();
 
   useEffect(() => {
     loadEvents();

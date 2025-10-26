@@ -12,6 +12,7 @@ import { useBookmarks } from '@/hooks/useBookmarks';
 import { useRatings } from '@/hooks/useRatings';
 import { RatingDialog } from '@/components/RatingDialog';
 import { Progress } from '@/components/ui/progress';
+import { useGamification } from '@/hooks/useGamification';
 
 interface Course {
   id: string;
@@ -42,7 +43,7 @@ const CoursesPage = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   
   const { isBookmarked, toggleBookmark } = useBookmarks(user?.id);
-  const { updateQuestProgress } = require('@/hooks/useGamification').useGamification();
+  const { updateQuestProgress } = useGamification();
 
   useEffect(() => {
     loadCourses();
