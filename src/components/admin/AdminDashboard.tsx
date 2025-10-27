@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, BookOpen, Calendar, Briefcase, Users, BarChart3 } from "lucide-react";
+import { Shield, BookOpen, Calendar, Briefcase, Users, BarChart3, UserCog } from "lucide-react";
 import CourseManagement from "./CourseManagement";
 import EventManagement from "./EventManagement";
 import JobManagement from "./JobManagement";
 import UserAnalytics from "./UserAnalytics";
 import AdminWelcome from "./AdminWelcome";
+import RoleManagement from "./RoleManagement";
 
 const AdminDashboard = () => {
   return (
@@ -20,10 +21,14 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="welcome" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto">
           <TabsTrigger value="welcome" className="gap-2">
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Главная</span>
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="gap-2">
+            <UserCog className="h-4 w-4" />
+            <span className="hidden sm:inline">Роли</span>
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -45,6 +50,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="welcome">
           <AdminWelcome />
+        </TabsContent>
+
+        <TabsContent value="roles">
+          <RoleManagement />
         </TabsContent>
 
         <TabsContent value="analytics">
