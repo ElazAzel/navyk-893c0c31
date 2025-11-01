@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,6 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
-    navigate('/');
-    return null;
-  }
-
   const [signInData, setSignInData] = useState({
     email: '',
     password: '',
@@ -31,6 +25,13 @@ const Auth = () => {
     email: '',
     password: '',
   });
+
+  // Redirect if already logged in (use effect to avoid conditional hook calls)
+  useEffect(() => {
+    if (user) navigate('/');
+  }, [user, navigate]);
+
+  if (user) return null;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

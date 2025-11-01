@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,13 +9,7 @@ export const useBookmarks = (userId: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (userId) {
-      loadBookmarks();
-    }
-  }, [userId]);
-
-  const loadBookmarks = async () => {
+  const loadBookmarks = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("bookmarks")
@@ -29,7 +23,13 @@ export const useBookmarks = (userId: string | undefined) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadBookmarks();
+    }
+  }, [userId, loadBookmarks]);
 
   const isBookmarked = (contentType: ContentType, contentId: string) => {
     return bookmarks.some(

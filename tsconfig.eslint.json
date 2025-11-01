@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "supabase/functions",
+    "supabase/functions/**/*",
+    "vite-env.d.ts"
+  ]
+}

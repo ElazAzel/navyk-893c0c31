@@ -26,11 +26,9 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   const navItems = [
     { id: "home", icon: Home, label: "Главная" },
-    { id: "courses", icon: BookOpen, label: "Курсы" },
-    { id: "analytics", icon: TrendingUp, label: "Аналитика" },
+    { id: "learning", icon: BookOpen, label: "Обучение" },
     { id: "jobs", icon: Briefcase, label: "Вакансии" },
-    { id: "bookmarks", icon: Bookmark, label: "Закладки" },
-    { id: "leaderboard", icon: Crown, label: "Рейтинг" },
+    { id: "social", icon: MessageSquare, label: "Соц" },
     ...(isAdmin ? [{ id: "admin", icon: Shield, label: "Админ" }] : []),
     { id: "profile", icon: User, label: "Профиль" },
   ];

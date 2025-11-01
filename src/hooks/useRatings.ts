@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,11 +11,7 @@ export const useRatings = (contentType: ContentType, contentId: string) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadRatings();
-  }, [contentType, contentId]);
-
-  const loadRatings = async () => {
+  const loadRatings = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("ratings")
@@ -42,7 +38,11 @@ export const useRatings = (contentType: ContentType, contentId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [contentType, contentId]);
+
+  useEffect(() => {
+    loadRatings();
+  }, [contentType, contentId, loadRatings]);
 
   const submitRating = async (rating: number, review?: string) => {
     try {

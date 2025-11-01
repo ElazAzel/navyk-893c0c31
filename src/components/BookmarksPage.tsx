@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,13 +24,7 @@ const BookmarksPage = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      loadBookmarks();
-    }
-  }, [user]);
-
-  const loadBookmarks = async () => {
+  const loadBookmarks = useCallback(async () => {
     try {
       const { data: bookmarksData, error } = await supabase
         .from("bookmarks")
@@ -84,7 +78,7 @@ const BookmarksPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   const removeBookmark = async (contentType: string, contentId: string) => {
     try {
@@ -114,6 +108,12 @@ const BookmarksPage = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      loadBookmarks();
+    }
+  }, [user, loadBookmarks]);
 
   if (loading) {
     return (

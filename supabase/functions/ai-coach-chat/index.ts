@@ -110,7 +110,7 @@ const tools = [
 
 // Tool execution functions
 async function searchJobs(supabase: any, skills?: string, limit = 3) {
-  let query = supabase
+  const query = supabase
     .from('jobs')
     .select('id, title, company, location, salary_min, salary_max, job_type, tags, requirements')
     .limit(limit);
@@ -125,7 +125,7 @@ async function searchJobs(supabase: any, skills?: string, limit = 3) {
 }
 
 async function searchMentors(supabase: any, expertise?: string, limit = 2) {
-  let query = supabase
+  const query = supabase
     .from('mentors')
     .select(`
       id,
@@ -267,7 +267,7 @@ serve(async (req) => {
     }
 
     // First call - check if AI wants to use tools
-    let aiMessages = [
+    const aiMessages = [
       { role: 'system', content: systemPrompt },
       ...messages
     ];

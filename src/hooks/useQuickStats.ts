@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuickStats {
@@ -19,13 +19,7 @@ export const useQuickStats = (userId: string | undefined) => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (userId) {
-      loadStats();
-    }
-  }, [userId]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const [enrollments, events, jobs] = await Promise.all([
         supabase
@@ -60,7 +54,13 @@ export const useQuickStats = (userId: string | undefined) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadStats();
+    }
+  }, [userId, loadStats]);
 
   return { stats, loading };
 };

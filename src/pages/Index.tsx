@@ -22,6 +22,10 @@ import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import LearningIndex from "@/components/groups/LearningIndex";
+import SocialIndex from "@/components/groups/SocialIndex";
+import AdminIndex from "@/components/groups/AdminIndex";
+import JobsIndex from "@/components/groups/JobsIndex";
 
 declare global {
   interface Window {
@@ -95,20 +99,20 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return <HomePage onNavigate={setActiveTab} userName={userName} />;
-      case "coach":
-        return <CoachPage />;
-      case "courses":
-        return <CoursesPage />;
+      case "learning":
+        return <LearningIndex />;
       case "events":
         return <EventsPage />;
+      case "jobs":
+        return <JobsIndex />;
       case "resume":
         return <ResumePage />;
       case "jobs":
         return <JobsPage />;
       case "mentors":
         return <MentorsPage />;
-      case "bookmarks":
-        return <BookmarksPage />;
+      case "social":
+        return <SocialIndex />;
       case "analytics":
         return <AnalyticsPage />;
       case "gamification":
@@ -129,7 +133,7 @@ const Index = () => {
       case "settings":
         return <AccountSettings />;
       case "admin":
-        return isAdmin ? <AdminDashboard /> : <HomePage onNavigate={setActiveTab} userName={userName} />;
+        return isAdmin ? <AdminIndex /> : <HomePage onNavigate={setActiveTab} userName={userName} />;
       default:
         return <HomePage onNavigate={setActiveTab} userName={userName} />;
     }
