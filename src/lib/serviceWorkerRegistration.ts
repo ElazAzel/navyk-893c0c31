@@ -11,8 +11,20 @@ export function registerServiceWorker() {
     window.addEventListener('load', () => {
       const swUrl = '/service-worker.js';
 
-      navigator.serviceWorker
-        .register(swUrl)
+      // First, attempt to unregister existing service workers that may contain
+      // older install logic (for example using cache.addAll) which can fail and
+      // keep serving old JS bundles. We do this proactively, then register a
+      // fresh service worker instance.
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => {
+          return Promise.all(
+            registrations.map((reg) => reg.unregister().catch(() => false))
+          );
+        })
+        .catch(() => [])
+        .then(() => {
+          return navigator.serviceWorker.register(swUrl);
+        })
         .then((registration) => {
           logger.info('ServiceWorker registered', { scope: registration.scope });
 
@@ -25,7 +37,7 @@ export function registerServiceWorker() {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New content available, show update prompt
                 logger.info('New content available, please refresh');
-                
+
                 // Optionally show UI notification
                 if (window.confirm('Доступна новая версия приложения. Обновить?')) {
                   newWorker.postMessage({ type: 'SKIP_WAITING' });

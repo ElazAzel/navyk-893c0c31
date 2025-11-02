@@ -1,7 +1,8 @@
 // Service Worker for offline support
 // Version 1.0.0
 
-const CACHE_NAME = 'navyk-cache-v1';
+// Bump this when changing cached assets so browsers will pick up the new SW
+const CACHE_NAME = 'navyk-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
