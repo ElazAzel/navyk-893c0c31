@@ -48,17 +48,50 @@ const Index = () => {
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
       
-      // Expand to full height
-      tg.expand();
-      
-      // Enable closing confirmation
-      tg.enableClosingConfirmation();
-      
-      // Set header color
-      tg.setHeaderColor('#1e1b2e');
+      // Expand to full height (guarded)
+      try {
+        if (typeof tg.expand === 'function') tg.expand();
+      } catch (e) {
+        // Ignore: some older WebApp environments may not support expand
+      }
 
-      // Show ready
-      tg.ready();
+      // Decide whether to call some newer WebApp methods by checking reported version
+      const versionString = (tg.initDataUnsafe && tg.initDataUnsafe.web_app_version) || (tg.initData && tg.initData.web_app_version) || (typeof tg.version === 'string' ? tg.version : undefined);
+      const parseMajor = (v?: string) => {
+        if (!v) return undefined;
+        const m = v.split('.')[0];
+        const n = Number(m);
+        return Number.isFinite(n) ? n : undefined;
+      };
+      const major = parseMajor(versionString);
+
+      // enableClosingConfirmation and setHeaderColor were not supported in older 6.0 runtimes
+      const shouldUseNewAppearanceFeatures = typeof major === 'number' ? major >= 7 : false;
+
+      if (shouldUseNewAppearanceFeatures) {
+        try {
+          if (typeof tg.enableClosingConfirmation === 'function') {
+            tg.enableClosingConfirmation();
+          }
+        } catch (e) {
+          // Ignore if not supported by the runtime version
+        }
+
+        try {
+          if (typeof tg.setHeaderColor === 'function') {
+            tg.setHeaderColor('#1e1b2e');
+          }
+        } catch (e) {
+          // Ignore if not supported by the runtime version
+        }
+      }
+
+      // Show ready (guarded)
+      try {
+        if (typeof tg.ready === 'function') tg.ready();
+      } catch (e) {
+        // Ignore
+      }
     }
   }, []);
 
@@ -107,8 +140,6 @@ const Index = () => {
         return <JobsIndex />;
       case "resume":
         return <ResumePage />;
-      case "jobs":
-        return <JobsPage />;
       case "mentors":
         return <MentorsPage />;
       case "social":
