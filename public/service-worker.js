@@ -16,9 +16,30 @@ self.addEventListener('install', (event) => {
   
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[ServiceWorker] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+      .then(async (cache) => {
+        console.log('[ServiceWorker] Caching static assets (resilient)');
+
+        // Try to add each asset individually and ignore failures so install won't fail
+        const results = await Promise.allSettled(
+          STATIC_ASSETS.map(async (asset) => {
+            try {
+              const resp = await fetch(asset, { cache: 'no-cache' });
+              if (!resp.ok) throw new Error(`Failed to fetch ${asset}: ${resp.status}`);
+              await cache.put(asset, resp.clone());
+              return { asset, ok: true };
+            } catch (err) {
+              console.warn('[ServiceWorker] Failed to cache', asset, err);
+              return { asset, ok: false, error: String(err) };
+            }
+          })
+        );
+
+        const failed = results.filter(r => r.status === 'fulfilled' ? !r.value.ok : true);
+        if (failed.length) {
+          console.warn('[ServiceWorker] Some assets failed to cache during install', failed.map(f => (f.status === 'fulfilled' ? f.value.asset : f)));
+        }
+
+        return;
       })
       .then(() => self.skipWaiting())
   );
