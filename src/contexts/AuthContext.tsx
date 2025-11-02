@@ -31,11 +31,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session) {
+        setSession(session);
+        setUser(session.user ?? null);
+        setLoading(false);
+        // persist a lightweight copy for manual restore if needed
+        try {
+          const save = {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: (session.expires_at ?? null),
+          };
+          localStorage.setItem('navyk_saved_session', JSON.stringify(save));
+        } catch (e) {
+          // ignore storage errors
+        }
+      } else {
+        // Try manual restore: if supabase didn't restore but we have saved tokens
+        try {
+          const raw = localStorage.getItem('navyk_saved_session');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.access_token || parsed?.refresh_token) {
+              // attempt to set session from saved tokens
+              await supabase.auth.setSession({
+                access_token: parsed.access_token || undefined,
+                refresh_token: parsed.refresh_token || undefined,
+              });
+
+              const { data: { session: restored } } = await supabase.auth.getSession();
+              setSession(restored);
+              setUser(restored?.user ?? null);
+            }
+          }
+        } catch (e) {
+          // ignore restore errors
+        } finally {
+          setLoading(false);
+        }
+      }
+    })();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -113,6 +151,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      try {
+        localStorage.removeItem('navyk_saved_session');
+      } catch (e) {
+        // ignore
+      }
       toast({
         title: "До встречи!",
         description: "Вы вышли из системы",
