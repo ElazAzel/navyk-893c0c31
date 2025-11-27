@@ -8,7 +8,6 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  // keep only React plugin here; removed direct dependency on 'lovable-tagger'
   plugins: [react()].filter(Boolean),
   resolve: {
     alias: {
